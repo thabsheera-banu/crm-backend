@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from . models import Lead,Deal
+from . models import Lead,Deal,Pipeline
 
 
 class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -44,33 +44,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-# class LeadSerializer(serializers.ModelSerializer):
-#     labels = serializers.PrimaryKeyRelatedField(queryset=Label.objects.all(), many=True, allow_empty=True)
-
-#     class Meta:
-#         model = Lead
-#         fields = '__all__'
-
-#     def create(self, validated_data):
-#         labels_data = validated_data.pop('labels', [])  
-#         lead = Lead.objects.create(**validated_data)
-
-#         for label_id in labels_data:
-#             label = Label.objects.get(pk=label_id)
-#             lead.labels.add(label) 
-
-#         return lead
-
-
 class LeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lead
         fields = '__all__'
 
     
-
 class DealSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deal
         fields = '__all__'
+
+    
     

@@ -4,6 +4,7 @@ from . models import Lead,Deal,Pipeline
 admin.site.register(Lead)
 admin.site.register(Deal)
 admin.site.register(Pipeline)
+
 # admin.site.register(Label)
 
 

@@ -3,12 +3,14 @@ from .serializers import UserTokenObtainPairSerializer, RegisterSerializer , Lea
 from django.contrib.auth.models import User
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
-from . models import Lead,Deal
+from . models import Lead,Deal,Pipeline
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from django_filters import rest_framework as filters
-from rest_framework.decorators import action    
+from rest_framework.decorators import action   
+from rest_framework import generics
+
 
 class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
@@ -40,6 +42,13 @@ class LeadViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=201, headers=headers)
     
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -65,6 +74,13 @@ class DealViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=201, headers=headers)
     
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
     def distroy(self):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -86,4 +102,28 @@ class DealViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(deal)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    
+
+class DealWithPipelineStatus(generics.RetrieveAPIView):
+    serializer_class = DealSerializer 
+    permission_classes = [IsAuthenticated] 
+    queryset = Deal.objects.all()  
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        all_pipeline_stages = Pipeline.objects.all()
+        selected_stages = instance.pipeline_status.all()
+        selected_stages_titles = [stage.title for stage in selected_stages]
+
+        pipeline_status = [
+            {
+                'title': stage.title,
+                'selected': stage.title in selected_stages_titles  
+            }
+            for stage in all_pipeline_stages
+        ]
+
+        return Response({
+            "deal": serializer.data,
+            "pipeline_status": pipeline_status
+        })
