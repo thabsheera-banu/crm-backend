@@ -81,10 +81,10 @@ class DealViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    def distroy(self):
+    def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
@@ -103,7 +103,8 @@ class DealViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-class DealWithPipelineStatus(generics.RetrieveAPIView):
+
+class DealWithPipelineStatus(generics.RetrieveUpdateAPIView):
     serializer_class = DealSerializer 
     permission_classes = [IsAuthenticated] 
     queryset = Deal.objects.all()  
@@ -127,3 +128,19 @@ class DealWithPipelineStatus(generics.RetrieveAPIView):
             "deal": serializer.data,
             "pipeline_status": pipeline_status
         })
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        selected_stage_title = request.data.get('stage_title')  
+        if selected_stage_title:
+            pipeline_stage = Pipeline.objects.get(title=selected_stage_title)
+
+            if pipeline_stage in instance.pipeline_status.all():
+                instance.pipeline_status.remove(pipeline_stage)
+            else:
+                instance.pipeline_status.add(pipeline_stage)
+
+            instance.save()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        return Response(status=400)
