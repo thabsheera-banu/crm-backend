@@ -35,7 +35,6 @@ class CommonFields(models.Model):
     organization = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True, blank=True, null=True)
-    # labels = models.ManyToManyField(Label,blank=True)
     labels = models.CharField(max_length=20, choices=LABEL_CHOICES, blank=True, null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     Expected_close_date = models.DateField(blank=True, null=True)
@@ -48,6 +47,7 @@ class CommonFields(models.Model):
     notes = models.TextField(blank= True)
     call = models.CharField(max_length=50, blank=True, null=True)
     activity = models.TextField(blank = True)
+    last_modified = models.DateTimeField(auto_now=True) 
       
 
     class Meta:

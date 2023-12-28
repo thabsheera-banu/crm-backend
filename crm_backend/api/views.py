@@ -29,7 +29,7 @@ class LeadViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         user_id = request.query_params.get('user_id') 
-        leads = Lead.objects.filter(owner=user_id)
+        leads = Lead.objects.filter(owner=user_id).order_by('-id')
         serializer = LeadSerializer(leads, many=True)
         return Response(serializer.data)
     
@@ -61,7 +61,7 @@ class DealViewSet(viewsets.ModelViewSet):
 
     def list(self,request):
         user_id = request.query_params.get('user_id')
-        deals = Deal.objects.filter(owner=user_id)
+        deals = Deal.objects.filter(owner=user_id).order_by('-id')
         serializer = LeadSerializer(deals, many=True)
         return Response(serializer.data)
     
@@ -129,18 +129,4 @@ class DealWithPipelineStatus(generics.RetrieveUpdateAPIView):
             "pipeline_status": pipeline_status
         })
     
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        selected_stage_title = request.data.get('stage_title')  
-        if selected_stage_title:
-            pipeline_stage = Pipeline.objects.get(title=selected_stage_title)
-
-            if pipeline_stage in instance.pipeline_status.all():
-                instance.pipeline_status.remove(pipeline_stage)
-            else:
-                instance.pipeline_status.add(pipeline_stage)
-
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        return Response(status=400)
+    
