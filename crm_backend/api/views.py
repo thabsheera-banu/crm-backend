@@ -102,7 +102,7 @@ class DealViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(deal)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-
+  
 
 class DealWithPipelineStatus(generics.RetrieveUpdateAPIView):
     serializer_class = DealSerializer 
